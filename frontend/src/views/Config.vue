@@ -14,6 +14,14 @@
             </select>
         </div>
         <div class="form-item">
+            <label>图片格式</label>
+            <select v-model="imageFormat" class="styled-select">
+                <option value="source">原始格式</option>
+                <option value="png">png</option>
+                <option value="jpg">jpg</option>
+            </select>
+        </div>
+        <div class="form-item">
             <label>命名风格</label>
             <select v-model="namingStyle" class="styled-select">
                 <option value="title" title="第1话">title 第1话</option>
@@ -40,6 +48,7 @@ import { bilicomicdownloader as model } from '../../wailsjs/go/models';
 
 const outputPath = ref<string>("")
 const packageType = ref<string>("")
+const imageFormat = ref<string>("")
 const namingStyle = ref<string>("")
 const urlBase = ref<string>("")
 const cookie = ref<string>("")
@@ -47,7 +56,7 @@ const toast = useToast();
 
 const saveConfig = () => {
     SaveConfig({
-        urlBase: urlBase.value, outputPath: outputPath.value, packageType: packageType.value, namingStyle: namingStyle.value, cookie: cookie.value
+        urlBase: urlBase.value, outputPath: outputPath.value, packageType: packageType.value, imageFormat: imageFormat.value, namingStyle: namingStyle.value, cookie: cookie.value
     }).then((res: any) => {
         console.log("配置已保存", res)
         toast.success('配置已保存', { timeout: 2000 });
@@ -63,6 +72,7 @@ onMounted(() => {
             urlBase.value = res.urlBase
             outputPath.value = res.outputPath
             packageType.value = res.packageType
+            imageFormat.value = res.imageFormat
             namingStyle.value = res.namingStyle
         }
     }).catch(() => {

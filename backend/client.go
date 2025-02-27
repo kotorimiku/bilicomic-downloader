@@ -64,3 +64,12 @@ func GetImage(url string) ([]byte, error) {
 	}
 	return resp.Body(), nil
 }
+
+func GetImageRaw(url string) (io.ReadCloser, error) {
+	resp, err := client.R().SetHeader("Accept", "image/webp,image/apng,image/*,*/*;q=0.8").Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	return resp.RawBody(), nil
+}

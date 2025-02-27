@@ -64,7 +64,7 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 	sem := make(chan struct{}, maxConcurrency)
 	var error error
 
-	for _, chapter := range chapters {
+	for index, chapter := range chapters {
 		url := fmt.Sprintf("https://%s%s", d.config.UrlBase, chapter.Url)
 		imgList, err := d.GetImageUrlList(url)
 		if err != nil {
@@ -72,7 +72,7 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 		}
 
 		total += len(imgList)
-		chapterPath := filepath.Join(folderPath, sanitizeFilename(chapter.Title))
+		chapterPath := filepath.Join(folderPath, sanitizeFilename(fmt.Sprintf("%d-%s", index+1, chapter.Title)))
 		os.MkdirAll(chapterPath, os.ModePerm)
 
 		for i, imgUrl := range imgList {
@@ -84,7 +84,7 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 					wg.Done()
 				}()
 				filePath := filepath.Join(chapterPath, fmt.Sprintf("%03d.%s", i+1, strings.Split(imgUrl, ".")[len(strings.Split(imgUrl, "."))-1]))
-				err := DownloadImage(img, filePath)
+				err := d.DownloadImage(img, filePath)
 				if err != nil {
 					error = err
 				}
@@ -154,12 +154,12 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 	return nil
 }
 
-func DownloadImage(url, filePath string) error {
+func (d *DownloaderSingle) DownloadImage(url, filePath string) error {
 	maxRetries := 50
+	ext := filepath.Ext(filePath)
 
 	for i := 0; i < maxRetries; i++ {
 		img, err := GetImage(url)
-
 		if err != nil {
 			fmt.Println("Error downloading image:", err)
 			time.Sleep(3 * time.Second)
@@ -167,13 +167,26 @@ func DownloadImage(url, filePath string) error {
 		}
 
 		if !isImage(img) {
-			fmt.Println(string(img))
-			fmt.Println("Image is not valid")
+			fmt.Println("Image is not valid, retrying...")
 			time.Sleep(3 * time.Second)
 			continue
 		}
 
-		err = os.WriteFile(filePath, img, os.ModePerm)
+		if d.config.ImageFormat == "png" {
+			filePath = strings.TrimSuffix(filePath, ext) + ".png"
+			img, err = ImgToPng(img)
+			if err != nil {
+				fmt.Println("Error converting image to png:", err)
+			}
+		} else if d.config.ImageFormat == "jpg" {
+			filePath = strings.TrimSuffix(filePath, ext) + ".jpg"
+			img, err = ImgToJpg(img)
+			if err != nil {
+				fmt.Println("Error converting image to jpg:", err)
+			}
+		}
+
+		os.WriteFile(filePath, img, os.ModePerm)
 		if err != nil {
 			fmt.Println("Error writing image file:", err)
 			time.Sleep(3 * time.Second)

@@ -12,6 +12,7 @@ type Config struct {
 	UrlBase     string `json:"urlBase"`
 	OutputPath  string `json:"outputPath"`
 	PackageType string `json:"packageType"`
+	ImageFormat string `json:"imageFormat"`
 	NamingStyle string `json:"namingStyle"`
 	Cookie      string `json:"cookie"`
 }
@@ -23,6 +24,7 @@ func NewConfig() *Config {
 		UrlBase:     "www.bilicomic.net",
 		OutputPath:  "./",
 		PackageType: "cbz",
+		ImageFormat: "source",
 		NamingStyle: "title",
 		Cookie:      "",
 	}

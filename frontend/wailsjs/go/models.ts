@@ -38,6 +38,7 @@ export namespace bilicomicdownloader {
 	    urlBase: string;
 	    outputPath: string;
 	    packageType: string;
+	    imageFormat: string;
 	    namingStyle: string;
 	    cookie: string;
 	
@@ -50,6 +51,7 @@ export namespace bilicomicdownloader {
 	        this.urlBase = source["urlBase"];
 	        this.outputPath = source["outputPath"];
 	        this.packageType = source["packageType"];
+	        this.imageFormat = source["imageFormat"];
 	        this.namingStyle = source["namingStyle"];
 	        this.cookie = source["cookie"];
 	    }
