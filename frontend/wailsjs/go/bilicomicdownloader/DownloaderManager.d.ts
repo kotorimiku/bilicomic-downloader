@@ -14,4 +14,6 @@ export function GetDownloader(arg1:string):Promise<void>;
 
 export function GetDownloaders():Promise<Array<bilicomicdownloader.DownloaderSingle>>;
 
+export function MessageSend(arg1:string):Promise<void>;
+
 export function ProcessSend():Promise<void>;

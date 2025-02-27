@@ -17,8 +17,19 @@ import { shallowRef } from 'vue';
 import Search from './views/Search.vue';
 import Config from './views/Config.vue';
 import Progress from './views/Progress.vue';
+import { EventsOn } from '../wailsjs/runtime/runtime';
+import { useToast } from 'vue-toastification';
 
 const currentPage = shallowRef(Search); // 存储当前组件
+const toast = useToast();
+
+EventsOn('message', (message: string) => {
+  console.log(message);
+  toast.info(message, {
+    timeout: 2000,
+    closeOnClick: false,
+  });
+});
 
 // 切换页面
 const changePage = (page: any) => {

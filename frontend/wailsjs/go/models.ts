@@ -95,6 +95,7 @@ export namespace bilicomicdownloader {
 	    Volume?: Volume;
 	    Index: number;
 	    Progress: number;
+	    Fail: boolean;
 	
 	    static createFrom(source: any = {}) {
 	        return new DownloaderSingle(source);
@@ -106,6 +107,7 @@ export namespace bilicomicdownloader {
 	        this.Volume = this.convertValues(source["Volume"], Volume);
 	        this.Index = source["Index"];
 	        this.Progress = source["Progress"];
+	        this.Fail = source["Fail"];
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {

@@ -12,19 +12,22 @@ import (
 )
 
 type DownloaderSingle struct {
-	BookInfo *BookInfo
-	Volume   *Volume
-	Index    int
-	config   *Config
-	Progress float32
+	BookInfo    *BookInfo
+	Volume      *Volume
+	Index       int
+	config      *Config
+	Progress    float32
+	Fail        bool
+	messageSend func(string)
 }
 
-func NewDownloaderSingle(bookInfo *BookInfo, volume *Volume, index int, config *Config) *DownloaderSingle {
+func NewDownloaderSingle(bookInfo *BookInfo, volume *Volume, index int, config *Config, messageSend func(string)) *DownloaderSingle {
 	return &DownloaderSingle{
-		BookInfo: bookInfo,
-		Volume:   volume,
-		Index:    index,
-		config:   config,
+		BookInfo:    bookInfo,
+		Volume:      volume,
+		Index:       index,
+		config:      config,
+		messageSend: messageSend,
 	}
 }
 
@@ -49,8 +52,21 @@ func (d *DownloaderSingle) GetImageUrlList(urlChapter string) ([]string, error) 
 	if len(imageUrls) == 0 {
 		return nil, fmt.Errorf("no image found")
 	}
-	return imageUrls, nil
 
+	return imageUrls, nil
+}
+
+func (d *DownloaderSingle) GetImageUrlListWithRetry(urlChapter string) ([]string, error) {
+	for _ = range 10 {
+		imgList, err := d.GetImageUrlList(urlChapter)
+		if err != nil {
+			d.messageSend(fmt.Sprintf("获取图片失败：%v", err.Error()))
+			time.Sleep(3 * time.Second)
+			continue
+		}
+		return imgList, nil
+	}
+	return nil, fmt.Errorf("获取图片失败")
 }
 
 func (d *DownloaderSingle) Download(processSend func()) error {
@@ -66,8 +82,9 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 
 	for index, chapter := range chapters {
 		url := fmt.Sprintf("https://%s%s", d.config.UrlBase, chapter.Url)
-		imgList, err := d.GetImageUrlList(url)
+		imgList, err := d.GetImageUrlListWithRetry(url)
 		if err != nil {
+			d.Fail = true
 			return err
 		}
 
@@ -84,9 +101,12 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 					wg.Done()
 				}()
 				filePath := filepath.Join(chapterPath, fmt.Sprintf("%03d.%s", i+1, strings.Split(imgUrl, ".")[len(strings.Split(imgUrl, "."))-1]))
-				err := d.DownloadImage(img, filePath)
-				if err != nil {
-					error = err
+				_, err := os.Stat(filePath)
+				if os.IsNotExist(err) {
+					err := d.DownloadImage(img, filePath)
+					if err != nil {
+						error = err
+					}
 				}
 				chapter.progress = float32(i+1) / float32(len(imgList)) * 100
 				progress := 0.0
@@ -103,6 +123,7 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 	wg.Wait()
 
 	if error != nil {
+		d.Fail = true
 		return error
 	}
 
@@ -162,12 +183,14 @@ func (d *DownloaderSingle) DownloadImage(url, filePath string) error {
 		img, err := GetImage(url)
 		if err != nil {
 			fmt.Println("Error downloading image:", err)
+			d.messageSend(fmt.Sprintf("Error downloading image: %v", err))
 			time.Sleep(3 * time.Second)
 			continue
 		}
 
 		if !isImage(img) {
 			fmt.Println("Image is not valid, retrying...")
+			d.messageSend("Image is not valid, retrying...")
 			time.Sleep(3 * time.Second)
 			continue
 		}
@@ -177,18 +200,25 @@ func (d *DownloaderSingle) DownloadImage(url, filePath string) error {
 			img, err = ImgToPng(img)
 			if err != nil {
 				fmt.Println("Error converting image to png:", err)
+				d.messageSend(fmt.Sprintf("Error converting image to png: %v", err))
+				time.Sleep(3 * time.Second)
+				continue
 			}
 		} else if d.config.ImageFormat == "jpg" {
 			filePath = strings.TrimSuffix(filePath, ext) + ".jpg"
 			img, err = ImgToJpg(img)
 			if err != nil {
 				fmt.Println("Error converting image to jpg:", err)
+				d.messageSend(fmt.Sprintf("Error converting image to jpg: %v", err))
+				time.Sleep(3 * time.Second)
+				continue
 			}
 		}
 
 		os.WriteFile(filePath, img, os.ModePerm)
 		if err != nil {
 			fmt.Println("Error writing image file:", err)
+			d.messageSend(fmt.Sprintf("Error writing image file: %v", err))
 			time.Sleep(3 * time.Second)
 			continue
 		}

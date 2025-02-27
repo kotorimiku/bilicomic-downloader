@@ -26,6 +26,10 @@ export function GetDownloaders() {
   return window['go']['bilicomicdownloader']['DownloaderManager']['GetDownloaders']();
 }
 
+export function MessageSend(arg1) {
+  return window['go']['bilicomicdownloader']['DownloaderManager']['MessageSend'](arg1);
+}
+
 export function ProcessSend() {
   return window['go']['bilicomicdownloader']['DownloaderManager']['ProcessSend']();
 }

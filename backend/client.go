@@ -10,23 +10,31 @@ import (
 var client *resty.Client = resty.New()
 
 func ClientInit(cookie string) {
-	var headers = map[string]string{
-		"User-Agent":                "Mozilla/5.0 (Linux; Android 11; M2102J20SG) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/97.0.4692.99 Mobile Safari/537.36 EdgA/97.0.1072.78",
-		"Accept-Language":           "en,zh-HK;q=0.9,zh-TW;q=0.8,zh-CN;q=0.7,zh;q=0.6,en-GB;q=0.5,en-US;q=0.4",
-		"Accept":                    "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
-		"Cookie":                    cookie,
-		"Referer":                   "www.bilicomic.net",
-		"Accept-Encoding":           "gzip, deflate",
-		"Priority":                  "u=0, i",
-		"Sec-CH-UA":                 `"Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"`,
-		"Sec-CH-UA-Mobile":          "?1",
-		"Sec-CH-UA-Platform":        `"Android"`,
-		"Sec-Fetch-Dest":            "document",
-		"Upgrade-Insecure-Requests": "1",
-		"Sec-Fetch-User":            "?1",
-		"Sec-Fetch-Site":            "same-origin",
-		"Sec-Fetch-Mode":            "navigate",
-		"Referrer-Policy":           "strict-origin-when-cross-origin",
+	headers := map[string]string{
+		"Accept":                      "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+		"Accept-Encoding":             "gzip, deflate",
+		"Accept-Language":             "zh-CN,zh;q=0.9,en;q=0.8,zh-TW;q=0.7",
+		"Cache-Control":               "max-age=0",
+		"Content-Type":                "application/x-www-form-urlencoded",
+		"Cookie":                      cookie,
+		"Origin":                      "https://www.bilicomic.net",
+		"Priority":                    "u=0, i",
+		"Referer":                     "https://www.bilicomic.net/read/78/4616.html?__cf_chl_tk=xbQ0jTrU2wgptFcOGBeXnbEDCainfHlCIEIWb145Ys8-1740640867-1.0.1.1-BxummUHvbxhg9MNBrbr9QeBnZK1rrA3zJgYbUHN5Ex4",
+		"Sec-Ch-Ua":                   `"Not A;Brand";v="99", "Chromium";v="133", "Google Chrome";v="133"`,
+		"Sec-Ch-Ua-Arch":              `""`,
+		"Sec-Ch-Ua-Bitness":           `"64"`,
+		"Sec-Ch-Ua-Full-Version":      `"133.0.0.0"`,
+		"Sec-Ch-Ua-Full-Version-List": `"Not(A:Brand";v="99.0.0.0", "Google Chrome";v="133.0.6943.128", "Chromium";v="133.0.6943.128"`,
+		"Sec-Ch-Ua-Mobile":            `?1`,
+		"Sec-Ch-Ua-Model":             `"Nexus 5"`,
+		"Sec-Ch-Ua-Platform":          `"Android"`,
+		"Sec-Ch-Ua-Platform-Version":  `"6.0"`,
+		"Sec-Fetch-Dest":              "document",
+		"Sec-Fetch-Mode":              "navigate",
+		"Sec-Fetch-Site":              "same-origin",
+		"Sec-Fetch-User":              `?1`,
+		"Upgrade-Insecure-Requests":   "1",
+		"User-Agent":                  "Mozilla/5.0 (Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Mobile Safari/537.36",
 	}
 
 	client.SetHeaders(headers)

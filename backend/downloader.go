@@ -22,16 +22,11 @@ func NewDownloader(bookId string, config *Config) *Downloader {
 	}
 }
 
-func (d *Downloader) GetDownloadList(chapters []int) []*DownloaderSingle {
+func (d *Downloader) GetDownloadList(chapters []int, messageSend func(string)) []*DownloaderSingle {
 	var downloaderSinglesList []*DownloaderSingle = make([]*DownloaderSingle, 0, len(chapters))
 	for _, index := range chapters {
-		downloaderSingle := DownloaderSingle{
-			Volume:   d.Volumes[index],
-			BookInfo: d.bookInfo,
-			config:   d.config,
-			Index:    index,
-		}
-		downloaderSinglesList = append(downloaderSinglesList, &downloaderSingle)
+		downloaderSingle := NewDownloaderSingle(d.bookInfo, d.Volumes[index], index, d.config, messageSend)
+		downloaderSinglesList = append(downloaderSinglesList, downloaderSingle)
 	}
 	return downloaderSinglesList
 }
@@ -39,7 +34,7 @@ func (d *Downloader) GetDownloadList(chapters []int) []*DownloaderSingle {
 func (d *Downloader) DownloadList(volumes []int) error {
 	for _, index := range volumes {
 		volume := d.Volumes[index]
-		downloadSingle := NewDownloaderSingle(d.bookInfo, volume, index, d.config)
+		downloadSingle := NewDownloaderSingle(d.bookInfo, volume, index, d.config, func(s string) {})
 		err := downloadSingle.Download(func() {})
 		if err != nil {
 			return err
