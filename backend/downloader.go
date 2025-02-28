@@ -2,6 +2,7 @@ package bilicomicdownloader
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 
 	"github.com/PuerkitoBio/goquery"
@@ -102,6 +103,7 @@ func (d *Downloader) GetVolume() error {
 	volumesNode := html.Find("#volumes").First()
 	volumesNode.Find("div.catalog-volume").Each(func(i int, s *goquery.Selection) {
 		vol_title := s.Find("li.chapter-bar.chapter-li").First().Text()
+		start_url := s.Find("li.volume-cover.chapter-li").First().Find("a").First().AttrOr("href", "")
 		cover := s.Find("img").First().AttrOr("src", "")
 		var chapters = make([]*Chapter, 0, 15)
 		s.Find("li.chapter-li.jsChapter").Each(func(i int, s *goquery.Selection) {
@@ -112,6 +114,9 @@ func (d *Downloader) GetVolume() error {
 				Url:   chapter_url,
 			})
 		})
+		if strings.Contains(chapters[0].Url, "javascript") {
+			chapters[0].Url = start_url
+		}
 		volumes = append(volumes, &Volume{
 			Title:    vol_title,
 			Cover:    cover,

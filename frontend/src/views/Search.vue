@@ -2,18 +2,12 @@
     <div class="container">
         <!-- 书籍 ID 输入框 -->
         <div class="input-group">
-            <input type="text" v-model="bookId" placeholder="请输入书籍 ID" class="input-box" />
+            <input type="text" v-model="bookId" placeholder="请输入书籍 ID" class="input-box" @keyup.enter="getChapterList"/>
             <button @click="getChapterList" class="btn">搜索</button>
         </div>
 
         <!-- 翻页按钮和下载操作按钮 -->
         <div class="action-buttons">
-            <!-- 翻页按钮 -->
-            <!-- <div class="pagination">
-                <button @click="prevPage" :disabled="searchPage === 1 || isLoading" class="btn">上一页</button>
-                <span>第 {{ searchPage }} 页</span>
-                <button @click="nextPage" :disabled="isLoading" class="btn">下一页</button>
-            </div> -->
 
             <!-- 下载操作按钮 -->
             <div class="button-group">
@@ -26,13 +20,6 @@
 
         <!-- 书籍信息和卷列表 -->
         <div class="box">
-            <!-- 书籍列表展示 -->
-            <!-- <div class="comic-list">
-                <div v-for="(comic, index) in searchResult" :key="index" class="comic-item">
-                    <img :src="comic.cover" :alt="comic.cover" @click="getChapterList(index)" class="comic-cover" />
-                    <p>{{ comic.name }}</p>
-                </div>
-            </div> -->
 
             <div class="chapter-list">
                 <chapterList :chapterList="chapterList" v-model:selectedChapters="selectedChapters"
@@ -78,27 +65,6 @@ const selectInverse = () => {
         }
     });
 };
-
-// 搜索书籍信息
-// const search = async () => {
-//     if (isLoading.value || !keyword.value) return;
-//     isLoading.value = true;
-//     try {
-//         const res = await Search(keyword.value.trim(), searchPage.value);
-//         searchResult.value = res;
-//         if (res.length === 0) {
-//             alert("没有找到相关书籍");
-//         }
-//     } catch (err) {
-//         console.error(err);
-//         toast.error(err, {
-//             timeout: 2000,
-//             closeOnClick: false,
-//         });
-//     } finally {
-//         isLoading.value = false;
-//     }
-// };
 
 // 获取章节列表
 const getChapterList = async () => {
@@ -150,20 +116,6 @@ const download = debounce(async () => {
         isDownloading.value = false;
     }
 }, 200);
-
-// 上一页
-// const prevPage = () => {
-//     if (searchPage.value > 1) {
-//         searchPage.value--;
-//         search();
-//     }
-// };
-
-// // 下一页
-// const nextPage = () => {
-//     searchPage.value++;
-//     search();
-// };
 </script>
 
 <style scoped>

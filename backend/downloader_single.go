@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -107,6 +108,7 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 					if err != nil {
 						error = err
 					}
+					time.Sleep(1 * time.Second)
 				}
 				chapter.progress = float32(i+1) / float32(len(imgList)) * 100
 				progress := 0.0
@@ -115,7 +117,6 @@ func (d *DownloaderSingle) Download(processSend func()) error {
 				}
 				d.Progress = float32(progress / float64(len(chapters)))
 				processSend()
-				time.Sleep(1 * time.Second)
 			}(i, imgUrl)
 		}
 	}
@@ -227,4 +228,42 @@ func (d *DownloaderSingle) DownloadImage(url, filePath string) error {
 	}
 
 	return fmt.Errorf("failed to download image: %s", url)
+}
+
+func GetNextUrl(html string) (string, error) {
+	re := regexp.MustCompile(`url_next:'(.+?)'`)
+
+	match := re.FindStringSubmatch(html)
+
+	if len(match) > 1 {
+		return match[1], nil
+	} else {
+		return "", fmt.Errorf("failed to find next url")
+	}
+}
+
+func GetPreViousUrl(html string) (string, error) {
+	re := regexp.MustCompile(`url_previous:'(.+?)'`)
+
+	match := re.FindStringSubmatch(html)
+
+	if len(match) > 1 {
+		return match[1], nil
+	} else {
+		return "", fmt.Errorf("failed to find previous url")
+	}
+}
+
+func GetStartUrl(volume *Volume) (string, error) {
+	if strings.Contains(volume.Chapters[0].Url, "javascript") {
+		if len(volume.Chapters) > 1 {
+			html, err := GetText(volume.Chapters[1].Url)
+			if err != nil {
+				return "", err
+			}
+			return GetPreViousUrl(html)
+		}
+		return "", fmt.Errorf("no chapters found")
+	}
+	return volume.Chapters[0].Url, nil
 }
