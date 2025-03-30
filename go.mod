@@ -6,7 +6,7 @@ require (
 	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/gen2brain/avif v0.4.3
 	github.com/go-resty/resty/v2 v2.16.5
-	github.com/wailsapp/wails/v2 v2.10.0
+	github.com/wailsapp/wails/v2 v2.10.1
 )
 
 require (

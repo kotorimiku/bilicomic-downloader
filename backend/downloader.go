@@ -102,7 +102,7 @@ func (d *Downloader) GetVolume() error {
 
 	volumesNode := html.Find("#volumes").First()
 	volumesNode.Find("div.catalog-volume").Each(func(i int, s *goquery.Selection) {
-		vol_title := s.Find("li.chapter-bar.chapter-li").First().Text()
+		vol_title := strings.TrimSpace(s.Find("div.vloume-info").First().Text())
 		start_url := s.Find("li.volume-cover.chapter-li").First().Find("a").First().AttrOr("href", "")
 		cover := s.Find("img").First().AttrOr("src", "")
 		var chapters = make([]*Chapter, 0, 15)
