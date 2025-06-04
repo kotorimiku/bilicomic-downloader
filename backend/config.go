@@ -21,7 +21,7 @@ var ConfigInstance *Config = Load()
 
 func NewConfig() *Config {
 	return &Config{
-		UrlBase:     "www.bilicomic.net",
+		UrlBase:     "www.bilimanga.net",
 		OutputPath:  "./",
 		PackageType: "cbz",
 		ImageFormat: "source",

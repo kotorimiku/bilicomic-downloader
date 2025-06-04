@@ -1,160 +1,116 @@
 <template>
-    <div class="config">
-        <div class="form-item">
-            <label>保存路径</label>
-            <input type="text" v-model="outputPath" placeholder="请输入保存路径" class="input-box" />
-        </div>
-        <div class="form-item">
-            <label>打包方式</label>
-            <select v-model="packageType" class="styled-select">
-                <option value="cbz" title="会添加元数据ComicInfo.xml">cbz</option>
-                <option value="zip">zip</option>
-                <option value="epub" title="epub对 avif 图片支持不好，建议使用cbz">epub</option>
-                <option value="image">图片</option>
-            </select>
-        </div>
-        <div class="form-item">
-            <label>图片格式</label>
-            <select v-model="imageFormat" class="styled-select">
-                <option value="source">原始格式</option>
-                <option value="png">png</option>
-                <option value="jpg">jpg</option>
-            </select>
-        </div>
-        <div class="form-item">
-            <label>命名风格</label>
-            <select v-model="namingStyle" class="styled-select">
-                <option value="title" title="第1话">title 第1话</option>
-                <option value="index-title" title="1-第1话">index-title 1-第1话</option>
-                <option value="02d-index-title" title="01-第1话">02d-index-title 01-第1话</option>
-                <option value="03d-index-title" title="001-第1话">03d-index-title 001-第1话</option>
-            </select>
-        </div>
-        <div class="form-item">
-            <label>cookie</label>
-            <input type="text" v-model="cookie" placeholder="请输入cookie" class="input-box" />
-        </div>
-        <div class="form-item">
-            <button @click="saveConfig" class="btn save-btn">保存配置</button>
-        </div>
-    </div>
+  <n-card title="配置设置" class="max-w-90 w-350 mx-auto my-5">
+    <n-form label-placement="left" label-width="100px" :model="form">
+      <n-form-item label="保存路径">
+        <n-input v-model:value="form.outputPath" placeholder="请输入保存路径" />
+      </n-form-item>
+
+      <n-form-item label="打包方式">
+        <n-select
+          v-model:value="form.packageType"
+          :options="packageOptions"
+          placeholder="请选择打包方式"
+        />
+      </n-form-item>
+
+      <n-form-item label="图片格式">
+        <n-select
+          v-model:value="form.imageFormat"
+          :options="imageFormatOptions"
+          placeholder="请选择图片格式"
+        />
+      </n-form-item>
+
+      <n-form-item label="命名风格">
+        <n-select
+          v-model:value="form.namingStyle"
+          :options="namingStyleOptions"
+          placeholder="请选择命名风格"
+        />
+      </n-form-item>
+
+      <n-form-item label="Cookie">
+        <n-input v-model:value="form.cookie" placeholder="请输入 cookie" />
+      </n-form-item>
+
+      <n-form-item>
+        <n-button type="primary" block @click="saveConfig">保存配置</n-button>
+      </n-form-item>
+    </n-form>
+  </n-card>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useToast } from "vue-toastification";
-import { SaveConfig, GetConfig } from '../../wailsjs/go/bilicomicdownloader/Config'
-import { bilicomicdownloader as model } from '../../wailsjs/go/models';
 
-const outputPath = ref<string>("")
-const packageType = ref<string>("")
-const imageFormat = ref<string>("")
-const namingStyle = ref<string>("")
-const urlBase = ref<string>("")
-const cookie = ref<string>("")
-const toast = useToast();
+<script setup lang="ts">
+import { ref, onMounted } from 'vue'
+import {
+  SaveConfig,
+  GetConfig
+} from '../../wailsjs/go/bilicomicdownloader/Config'
+import { bilicomicdownloader as model } from '../../wailsjs/go/models'
+import { useRunCommand } from '../composables/RunCommand'
+import { useNotify } from '../composables/useNotification'
+
+const runCommand = useRunCommand()
+const notify = useNotify()
+
+const form = ref({
+  outputPath: '',
+  packageType: '',
+  imageFormat: '',
+  namingStyle: '',
+  cookie: '',
+})
+
+const packageOptions = [
+  { label: 'cbz（含ComicInfo.xml）', value: 'cbz' },
+  { label: 'zip', value: 'zip' },
+  { label: 'epub（不支持avif）', value: 'epub' },
+  { label: '图片', value: 'image' }
+]
+
+const imageFormatOptions = [
+  { label: '原始格式', value: 'source' },
+  { label: 'png', value: 'png' },
+  { label: 'jpg', value: 'jpg' }
+]
+
+const namingStyleOptions = [
+  { label: 'title 第1话', value: 'title' },
+  { label: 'index-title 1-第1话', value: 'index-title' },
+  { label: '02d-index-title 01-第1话', value: '02d-index-title' },
+  { label: '03d-index-title 001-第1话', value: '03d-index-title' }
+]
 
 const saveConfig = () => {
-    SaveConfig({
-        urlBase: urlBase.value, outputPath: outputPath.value, packageType: packageType.value, imageFormat: imageFormat.value, namingStyle: namingStyle.value, cookie: cookie.value
-    }).then((res: any) => {
-        console.log("配置已保存", res)
-        toast.success('配置已保存', { timeout: 2000 });
-    }).catch((err: any) => {
-        console.error("保存配置失败", err)
-        toast.error('保存配置失败', { timeout: 2000 });
-    })
+  runCommand({
+    command: () =>
+      SaveConfig({
+        urlBase: '', // 可根据实际需求添加 urlBase 字段
+        outputPath: form.value.outputPath,
+        packageType: form.value.packageType,
+        imageFormat: form.value.imageFormat,
+        namingStyle: form.value.namingStyle,
+        cookie: form.value.cookie
+      }),
+    onSuccess: () => notify.success({ content: '保存成功' }),
+    errMsg: '保存失败'
+  })
 }
 
 onMounted(() => {
-    GetConfig().then((res: model.Config) => {
-        if (res) {
-            urlBase.value = res.urlBase
-            outputPath.value = res.outputPath
-            packageType.value = res.packageType
-            imageFormat.value = res.imageFormat
-            namingStyle.value = res.namingStyle
-        }
-    }).catch(() => {
-        console.log("获取配置失败")
-        toast.error('获取配置失败', { timeout: 2000 });
-    })
+  runCommand({
+    command: GetConfig,
+    onSuccess: (res: model.Config) => {
+      if (res) {
+        form.value.outputPath = res.outputPath
+        form.value.packageType = res.packageType
+        form.value.imageFormat = res.imageFormat
+        form.value.namingStyle = res.namingStyle
+        form.value.cookie = res.cookie
+      }
+    },
+    errMsg: '获取配置失败'
+  })
 })
 </script>
-
-<style scoped>
-.config {
-    width: 100%;
-    max-width: 350px;
-    padding: 20px;
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    margin: 20px auto;
-    font-family: 'Arial', sans-serif;
-}
-
-.form-item {
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-}
-
-label {
-    font-weight: 600;
-    font-size: 14px;
-    color: #333;
-    width: 100px;
-    text-align: left;
-}
-
-.input-box,
-.styled-select {
-    width: 100%;
-    padding: 10px;
-    font-size: 14px;
-    border-radius: 5px;
-    border: 1px solid #ddd;
-    transition: border-color 0.3s ease;
-}
-
-.input-box:focus,
-.styled-select:focus {
-    border-color: #4CAF50;
-}
-
-.styled-select {
-    appearance: none;
-    background-color: #fff;
-    cursor: pointer;
-}
-
-.styled-select::after {
-    content: '\2193';
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 18px;
-    color: #888;
-    pointer-events: none;
-}
-
-.btn {
-    padding: 10px 20px;
-    font-size: 14px;
-    background-color: #4CAF50;
-    color: white;
-    font-weight: 600;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    cursor: pointer;
-    width: 100%;
-    transition: background-color 0.3s, transform 0.3s;
-}
-
-.btn:hover {
-    background-color: #45a049;
-    transform: translateY(-2px);
-}
-</style>

@@ -1,55 +1,26 @@
 <template>
-  <div>
-    <!-- 配置切换按钮 -->
-    <div class="switch-container">
-      <button @click="changePage(Search)" class="btn">搜索页面</button>
-      <button @click="changePage(Progress)" class="btn">进度</button>
-      <button @click="changePage(Config)" class="btn">配置页面</button>
-    </div>
+  <n-notification-provider>
+    <n-space class="my-4">
+      <n-button @click="changePage(Search)">搜索页面</n-button>
+      <n-button @click="changePage(Progress)">进度</n-button>
+      <n-button @click="changePage(Config)">配置页面</n-button>
+    </n-space>
     <KeepAlive :exclude="['Progress']">
       <component :is="currentPage" />
     </KeepAlive>
-  </div>
+  </n-notification-provider>
 </template>
 
 <script setup lang="ts">
-import { shallowRef } from 'vue';
-import Search from './views/Search.vue';
-import Config from './views/Config.vue';
-import Progress from './views/Progress.vue';
-import { EventsOn } from '../wailsjs/runtime/runtime';
-import { useToast } from 'vue-toastification';
+import { shallowRef } from "vue";
+import Search from "./views/Search.vue";
+import Config from "./views/Config.vue";
+import Progress from "./views/Progress.vue";
 
-const currentPage = shallowRef(Search); // 存储当前组件
-const toast = useToast();
+import { NNotificationProvider, NButton, NSpace } from "naive-ui";
 
-EventsOn('message', (message: string) => {
-  console.log(message);
-  toast.info(message, {
-    timeout: 2000,
-    closeOnClick: false,
-  });
-});
-
-// 切换页面
+const currentPage = shallowRef(Search);
 const changePage = (page: any) => {
-  currentPage.value = page; // 直接切换组件
+  currentPage.value = page;
 };
 </script>
-
-<style scoped>
-/* 按钮样式 */
-.btn {
-  padding: 8px 16px;
-  font-size: 14px;
-  background-color: #fff;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn:hover {
-  background-color: #f1f1f1;
-}
-</style>
